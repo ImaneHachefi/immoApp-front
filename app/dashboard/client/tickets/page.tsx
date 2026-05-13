@@ -2,20 +2,26 @@
 import { useEffect, useState } from 'react';
 import ProtectedRoute from '../../../components/ProtectedRoute';
 import api from '../../../lib/api';
+import { Ticket, Plus, Send, FolderOpen, Settings2, CheckCircle, Lock, X, Calendar, UserCircle } from 'lucide-react';
 
-interface Ticket { id: number; sujet: string; description: string; statut: string; priorite: string; dateCreation: string; dateResolution: string | null; nomAgent: string | null }
+interface TicketItem { id: number; sujet: string; description: string; statut: string; priorite: string; dateCreation: string; dateResolution: string | null; nomAgent: string | null }
 
-const statutColors: Record<string, string> = { OUVERT: '#f59e0b', EN_COURS: '#639dff', RESOLU: '#34d399', FERME: '#94a3b8' };
-const statutIcons: Record<string, string> = { OUVERT: '📂', EN_COURS: '⚙️', RESOLU: '✅', FERME: '🔒' };
+const statutColors: Record<string, string> = { OUVERT: '#d4a017', EN_COURS: '#2563eb', RESOLU: '#10b981', FERME: '#94a3b8' };
+const statutIcons: Record<string, React.ReactNode> = {
+  OUVERT: <FolderOpen className="w-3 h-3" />,
+  EN_COURS: <Settings2 className="w-3 h-3" />,
+  RESOLU: <CheckCircle className="w-3 h-3" />,
+  FERME: <Lock className="w-3 h-3" />,
+};
 
 export default function MesTickets() {
-  const [tickets, setTickets] = useState<Ticket[]>([]);
+  const [tickets, setTickets] = useState<TicketItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [form, setForm] = useState({ sujet: '', description: '', priorite: 'MOYENNE' });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
-  const [selected, setSelected] = useState<Ticket | null>(null);
+  const [selected, setSelected] = useState<TicketItem | null>(null);
   const [messages, setMessages] = useState<any[]>([]);
   const [message, setMessage] = useState('');
   const [sending, setSending] = useState(false);
@@ -61,68 +67,67 @@ export default function MesTickets() {
 
   return (
     <ProtectedRoute allowedRoles={['CLIENT', 'ADMIN']}>
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=DM+Sans:wght@300;400;500&display=swap');`}</style>
-      <div style={{ maxWidth: 1200 }}>
+      <div className="max-w-[1200px]">
         {/* Header */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 32 }}>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 mb-8">
           <div>
-            <div style={{ fontSize: 11, letterSpacing: '0.2em', textTransform: 'uppercase', color: '#639dff', marginBottom: 8 }}>Support</div>
-            <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 40, fontWeight: 300, color: '#f0ece4', margin: 0 }}>Mes Tickets SAV</h1>
-            <p style={{ color: 'rgba(240,236,228,0.5)', fontSize: 14, marginTop: 4 }}>Suivez vos demandes d'assistance</p>
+            <div className="text-xs font-semibold tracking-[0.2em] uppercase text-primary mb-2">Support</div>
+            <h1 className="font-display text-3xl md:text-4xl font-light text-foreground">Mes Tickets SAV</h1>
+            <p className="text-muted-foreground text-sm mt-1">Suivez vos demandes d&apos;assistance</p>
           </div>
-          <button onClick={() => setShowModal(true)} style={{ background: 'linear-gradient(135deg,#1d4ed8,#3b82f6)', color: '#fff', padding: '12px 24px', borderRadius: 8, border: 'none', cursor: 'pointer', fontFamily: "'DM Sans',sans-serif", fontSize: 13, fontWeight: 500 }}>
-            + Nouveau Ticket
+          <button onClick={() => setShowModal(true)} className="bg-primary text-primary-foreground px-5 py-3 rounded-lg text-sm font-medium flex items-center gap-2 hover:brightness-110 transition-all cursor-pointer shadow-sm">
+            <Plus className="w-4 h-4" />
+            Nouveau Ticket
           </button>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 420px', gap: 20 }}>
-          {/* Liste */}
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_420px] gap-5">
+          {/* List */}
           <div>
             {loading ? (
-              <div style={{ textAlign: 'center', padding: 60, color: 'rgba(240,236,228,0.4)', fontSize: 14 }}>Chargement...</div>
+              <div className="text-center py-16 text-muted-foreground text-sm">Chargement...</div>
             ) : tickets.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: 60, background: '#0b1825', borderRadius: 12, border: '1px solid rgba(255,255,255,0.06)' }}>
-                <div style={{ fontSize: 40, marginBottom: 12 }}>🎫</div>
-                <p style={{ color: 'rgba(240,236,228,0.4)', fontSize: 14 }}>Aucun ticket pour le moment</p>
-                <button onClick={() => setShowModal(true)} style={{ marginTop: 16, padding: '10px 20px', background: 'rgba(99,157,255,0.1)', border: '1px solid rgba(99,157,255,0.2)', borderRadius: 8, color: '#639dff', cursor: 'pointer', fontFamily: "'DM Sans',sans-serif", fontSize: 13 }}>
+              <div className="text-center py-16 bg-surface rounded-xl border border-surface-border">
+                <Ticket className="w-10 h-10 text-muted-foreground/40 mx-auto mb-3" />
+                <p className="text-muted-foreground text-sm mb-4">Aucun ticket pour le moment</p>
+                <button onClick={() => setShowModal(true)} className="px-5 py-2.5 bg-primary/10 border border-primary/20 rounded-lg text-primary cursor-pointer hover:bg-primary/15 transition-colors text-sm font-medium">
                   Créer mon premier ticket
                 </button>
               </div>
             ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div className="flex flex-col gap-3">
                 {tickets.map(t => (
-                  <div key={t.id} onClick={() => { setSelected(t); loadMessages(t.id); }} style={{
-                    background: '#0b1825', borderRadius: 12, padding: '18px 20px',
-                    border: selected?.id === t.id ? '1px solid rgba(99,157,255,0.3)' : '1px solid rgba(255,255,255,0.06)',
-                    cursor: 'pointer', transition: 'all 0.2s',
-                    borderLeft: `4px solid ${statutColors[t.statut]}`,
-                  }}
-                    onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = 'translateX(4px)'; }}
-                    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = 'translateX(0)'; }}
+                  <button key={t.id} onClick={() => { setSelected(t); loadMessages(t.id); }}
+                    className={`w-full text-left bg-surface rounded-xl px-5 py-4 border transition-all cursor-pointer hover:translate-x-1 ${
+                      selected?.id === t.id ? 'border-primary/30 shadow-sm' : 'border-surface-border hover:border-surface-border'
+                    }`}
+                    style={{ borderLeftWidth: 4, borderLeftColor: statutColors[t.statut] }}
                   >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
+                    <div className="flex justify-between items-start mb-2">
                       <div>
-                        <span style={{ fontSize: 11, color: 'rgba(240,236,228,0.3)', marginRight: 8 }}>#{t.id}</span>
-                        <span style={{ fontSize: 15, fontWeight: 500, color: '#f0ece4' }}>{t.sujet}</span>
+                        <span className="text-xs text-muted-foreground mr-2">#{t.id}</span>
+                        <span className="text-sm font-medium text-foreground">{t.sujet}</span>
                       </div>
-                      <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                        <span style={{ fontSize: 10, padding: '3px 10px', borderRadius: 100, background: `${statutColors[t.statut]}18`, color: statutColors[t.statut], fontWeight: 700 }}>
-                          {statutIcons[t.statut]} {t.statut}
-                        </span>
-                      </div>
+                      <span
+                        className="text-[10px] font-bold px-2.5 py-1 rounded-full flex items-center gap-1"
+                        style={{ background: `${statutColors[t.statut]}18`, color: statutColors[t.statut] }}
+                      >
+                        {statutIcons[t.statut]} {t.statut}
+                      </span>
                     </div>
-                    {t.description && <p style={{ fontSize: 13, color: 'rgba(240,236,228,0.45)', margin: '0 0 10px', lineHeight: 1.5 }}>{t.description.slice(0, 100)}{t.description.length > 100 ? '...' : ''}</p>}
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ fontSize: 11, color: 'rgba(240,236,228,0.3)' }}>
-                        📅 {t.dateCreation ? new Date(t.dateCreation).toLocaleDateString('fr-FR') : ''}
+                    {t.description && <p className="text-xs text-muted-foreground mb-2.5 line-clamp-2">{t.description}</p>}
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs text-muted-foreground/70 flex items-center gap-1">
+                        <Calendar className="w-3 h-3" />
+                        {t.dateCreation ? new Date(t.dateCreation).toLocaleDateString('fr-FR') : ''}
                       </span>
                       {t.nomAgent ? (
-                        <span style={{ fontSize: 11, color: 'rgba(240,236,228,0.4)' }}>👤 Agent : {t.nomAgent}</span>
+                        <span className="text-xs text-muted-foreground flex items-center gap-1"><UserCircle className="w-3 h-3" /> Agent : {t.nomAgent}</span>
                       ) : (
-                        <span style={{ fontSize: 11, color: 'rgba(240,236,228,0.2)' }}>En attente d'assignation</span>
+                        <span className="text-xs text-muted-foreground/50 italic">En attente d&apos;assignation</span>
                       )}
                     </div>
-                  </div>
+                  </button>
                 ))}
               </div>
             )}
@@ -130,40 +135,43 @@ export default function MesTickets() {
 
           {/* Conversation */}
           {selected ? (
-            <div style={{ background: '#0b1825', borderRadius: 12, border: '1px solid rgba(255,255,255,0.06)', display: 'flex', flexDirection: 'column', overflow: 'hidden', maxHeight: 580 }}>
-              <div style={{ padding: '16px 20px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-                <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 18, fontWeight: 500, color: '#f0ece4', margin: '0 0 4px' }}>{selected.sujet}</h3>
-                <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 100, background: `${statutColors[selected.statut]}18`, color: statutColors[selected.statut] }}>{selected.statut}</span>
+            <div className="bg-surface rounded-xl border border-surface-border flex flex-col overflow-hidden max-h-[580px] shadow-sm">
+              <div className="px-5 py-4 border-b border-surface-border">
+                <h3 className="font-display text-base font-medium text-foreground mb-1">{selected.sujet}</h3>
+                <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: `${statutColors[selected.statut]}18`, color: statutColors[selected.statut] }}>{selected.statut}</span>
               </div>
-              <div style={{ flex: 1, overflowY: 'auto', padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <div className="flex-1 overflow-y-auto px-4 py-3 flex flex-col gap-2.5">
                 {messages.length === 0 ? (
-                  <p style={{ textAlign: 'center', color: 'rgba(240,236,228,0.3)', fontSize: 13, padding: 20 }}>Aucun message pour ce ticket</p>
+                  <p className="text-center text-muted-foreground text-sm py-10">Aucun message pour ce ticket</p>
                 ) : messages.map((m: any, i: number) => (
-                  <div key={i} style={{ display: 'flex', justifyContent: m.expediteur === 'CLIENT' ? 'flex-end' : 'flex-start' }}>
-                    <div style={{
-                      maxWidth: '80%', padding: '10px 14px', borderRadius: 10,
-                      background: m.expediteur === 'CLIENT' ? 'rgba(59,130,246,0.2)' : m.estBot ? 'rgba(167,139,250,0.1)' : 'rgba(255,255,255,0.06)',
-                      border: '1px solid rgba(255,255,255,0.06)',
-                    }}>
-                      <div style={{ fontSize: 10, color: 'rgba(240,236,228,0.4)', marginBottom: 4 }}>
-                        {m.estBot ? '🤖 BOT' : m.expediteur}
-                      </div>
-                      <div style={{ fontSize: 13, color: '#f0ece4', lineHeight: 1.5 }}>{m.contenu}</div>
+                  <div key={i} className={`flex ${m.expediteur === 'CLIENT' ? 'justify-end' : 'justify-start'}`}>
+                    <div className={`max-w-[80%] px-3.5 py-2.5 rounded-xl text-sm ${
+                      m.expediteur === 'CLIENT'
+                        ? 'bg-primary/10 border border-primary/20 text-foreground'
+                        : m.estBot
+                          ? 'bg-purple-500/10 border border-purple-500/15 text-foreground'
+                          : 'bg-muted border border-surface-border text-foreground'
+                    }`}>
+                      <div className="text-[10px] text-muted-foreground mb-1">{m.estBot ? '🤖 BOT' : m.expediteur}</div>
+                      <div className="leading-relaxed">{m.contenu}</div>
                     </div>
                   </div>
                 ))}
               </div>
               {selected.statut !== 'FERME' && selected.statut !== 'RESOLU' && (
-                <form onSubmit={handleSendMessage} style={{ padding: '12px 14px', borderTop: '1px solid rgba(255,255,255,0.06)', display: 'flex', gap: 8 }}>
+                <form onSubmit={handleSendMessage} className="px-4 py-3 border-t border-surface-border flex gap-2">
                   <input value={message} onChange={e => setMessage(e.target.value)} placeholder="Votre message..."
-                    style={{ flex: 1, padding: '9px 14px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, color: '#f0ece4', fontFamily: "'DM Sans',sans-serif", fontSize: 13, outline: 'none' }} />
-                  <button type="submit" disabled={sending || !message.trim()} style={{ padding: '9px 16px', background: 'linear-gradient(135deg,#1d4ed8,#3b82f6)', border: 'none', borderRadius: 8, color: '#fff', cursor: 'pointer', fontSize: 14 }}>➤</button>
+                    className="flex-1 px-3.5 py-2.5 bg-muted border border-surface-border rounded-lg text-foreground text-sm outline-none focus:border-primary transition-all placeholder:text-muted-foreground/50" />
+                  <button type="submit" disabled={sending || !message.trim()}
+                    className="px-4 py-2.5 bg-primary text-primary-foreground rounded-lg cursor-pointer hover:brightness-110 transition-all disabled:opacity-40 disabled:cursor-default">
+                    <Send className="w-4 h-4" />
+                  </button>
                 </form>
               )}
             </div>
           ) : (
-            <div style={{ background: '#0b1825', borderRadius: 12, border: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <p style={{ color: 'rgba(240,236,228,0.3)', fontSize: 14, textAlign: 'center' }}>← Sélectionnez un ticket<br />pour voir la conversation</p>
+            <div className="bg-surface rounded-xl border border-surface-border flex items-center justify-center min-h-[300px]">
+              <p className="text-muted-foreground text-sm text-center">← Sélectionnez un ticket<br />pour voir la conversation</p>
             </div>
           )}
         </div>
@@ -171,33 +179,38 @@ export default function MesTickets() {
 
       {/* Modal nouveau ticket */}
       {showModal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, backdropFilter: 'blur(4px)' }}>
-          <div style={{ background: '#0b1825', borderRadius: 16, padding: 32, width: 460, border: '1px solid rgba(255,255,255,0.1)' }}>
-            <h2 style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 28, fontWeight: 400, color: '#f0ece4', margin: '0 0 24px' }}>Nouveau ticket</h2>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[1000]">
+          <div className="bg-surface rounded-2xl p-8 w-[460px] max-w-[90vw] border border-surface-border shadow-2xl">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="font-display text-2xl font-medium text-foreground">Nouveau ticket</h2>
+              <button onClick={() => setShowModal(false)} className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
             <form onSubmit={handleCreate}>
-              <div style={{ marginBottom: 16 }}>
-                <label style={{ fontSize: 11, color: 'rgba(240,236,228,0.5)', display: 'block', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Sujet</label>
+              <div className="mb-4">
+                <label className="text-xs font-medium text-muted-foreground block mb-1.5 uppercase tracking-wider">Sujet</label>
                 <input type="text" placeholder="Décrivez votre problème brièvement" value={form.sujet} onChange={e => setForm({ ...form, sujet: e.target.value })} required
-                  style={{ width: '100%', padding: '10px 14px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, color: '#f0ece4', fontFamily: "'DM Sans',sans-serif", fontSize: 14, outline: 'none', boxSizing: 'border-box' }} />
+                  className="w-full px-3.5 py-2.5 bg-muted border border-surface-border rounded-lg text-foreground text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all placeholder:text-muted-foreground/50" />
               </div>
-              <div style={{ marginBottom: 16 }}>
-                <label style={{ fontSize: 11, color: 'rgba(240,236,228,0.5)', display: 'block', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Description</label>
+              <div className="mb-4">
+                <label className="text-xs font-medium text-muted-foreground block mb-1.5 uppercase tracking-wider">Description</label>
                 <textarea value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} rows={4} placeholder="Donnez plus de détails..."
-                  style={{ width: '100%', padding: '10px 14px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, color: '#f0ece4', fontFamily: "'DM Sans',sans-serif", fontSize: 14, outline: 'none', resize: 'vertical', boxSizing: 'border-box' }} />
+                  className="w-full px-3.5 py-2.5 bg-muted border border-surface-border rounded-lg text-foreground text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all resize-y placeholder:text-muted-foreground/50" />
               </div>
-              <div style={{ marginBottom: 20 }}>
-                <label style={{ fontSize: 11, color: 'rgba(240,236,228,0.5)', display: 'block', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Priorité</label>
+              <div className="mb-5">
+                <label className="text-xs font-medium text-muted-foreground block mb-1.5 uppercase tracking-wider">Priorité</label>
                 <select value={form.priorite} onChange={e => setForm({ ...form, priorite: e.target.value })}
-                  style={{ width: '100%', padding: '10px 14px', background: '#060e18', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, color: '#f0ece4', fontFamily: "'DM Sans',sans-serif", fontSize: 14, outline: 'none' }}>
+                  className="w-full px-3.5 py-2.5 bg-muted border border-surface-border rounded-lg text-foreground text-sm outline-none focus:border-primary cursor-pointer">
                   <option value="BASSE">🟢 Basse</option>
                   <option value="MOYENNE">🟡 Moyenne</option>
                   <option value="HAUTE">🔴 Haute</option>
                 </select>
               </div>
-              {error && <p style={{ color: '#f87171', fontSize: 13, marginBottom: 16 }}>{error}</p>}
-              <div style={{ display: 'flex', gap: 12 }}>
-                <button type="button" onClick={() => setShowModal(false)} style={{ flex: 1, padding: '11px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, color: '#f0ece4', cursor: 'pointer', fontFamily: "'DM Sans',sans-serif" }}>Annuler</button>
-                <button type="submit" disabled={saving} style={{ flex: 1, padding: '11px', background: 'linear-gradient(135deg,#1d4ed8,#3b82f6)', border: 'none', borderRadius: 8, color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans',sans-serif", fontWeight: 500 }}>
+              {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
+              <div className="flex gap-3">
+                <button type="button" onClick={() => setShowModal(false)} className="flex-1 py-2.5 bg-muted border border-surface-border rounded-lg text-foreground cursor-pointer hover:bg-muted/80 transition-colors text-sm font-medium">Annuler</button>
+                <button type="submit" disabled={saving} className="flex-1 py-2.5 bg-primary text-primary-foreground rounded-lg cursor-pointer hover:brightness-110 transition-all text-sm font-medium">
                   {saving ? 'Envoi...' : 'Créer le ticket'}
                 </button>
               </div>

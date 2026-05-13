@@ -1,26 +1,72 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Light mode — warm neutral with deep navy accent */
+  --background: #f8f9fb;
+  --foreground: #0f172a;
+
+  --surface: #ffffff;
+  --surface-border: #e2e8f0;
+
+  --primary: #b8860b;       /* Dark goldenrod — strong, readable */
+  --primary-foreground: #ffffff;
+
+  --accent: #1e3a5f;        /* Deep navy accent */
+  --accent-foreground: #ffffff;
+
+  --muted: #f1f5f9;
+  --muted-foreground: #475569;
+}
+
+.dark {
+  /* Dark mode — deep charcoal with warm gold */
+  --background: #0c1220;
+  --foreground: #f1f5f9;
+
+  --surface: #141c2e;
+  --surface-border: #1e2d45;
+
+  --primary: #d4a017;       /* Rich gold — warm and visible */
+  --primary-foreground: #0c1220;
+
+  --accent: #2563eb;
+  --accent-foreground: #ffffff;
+
+  --muted: #1a2538;
+  --muted-foreground: #94a3b8;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  --color-surface: var(--surface);
+  --color-surface-border: var(--surface-border);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-outfit), ui-sans-serif, system-ui, sans-serif;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Selection color */
+::selection {
+  background: var(--primary);
+  color: var(--primary-foreground);
 }

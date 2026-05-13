@@ -3,8 +3,10 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { Building, Mail, Lock, ArrowRight, Loader2 } from "lucide-react";
 import api from "../lib/api";
 import { saveAuth } from "../lib/auth";
+import FloatingThemeToggle from "../components/FloatingThemeToggle";
 
 export default function Login() {
   const router = useRouter();
@@ -26,90 +28,122 @@ export default function Login() {
 
       saveAuth(response.data);
 
-      // Redirection selon le rôle
       const role = response.data.role;
       if (role === "ADMIN") router.push("/dashboard/admin");
       else if (role === "AGENT_COMMERCIAL") router.push("/dashboard/agent-commercial");
       else if (role === "AGENT_SAV") router.push("/dashboard/agent-sav");
       else router.push("/dashboard/client");
-
-    } catch (err: any) {
-      setError(
-        err.response?.data?.erreur || "Email ou mot de passe incorrect"
-      );
+    } catch (err: unknown) {
+      const axiosErr = err as { response?: { data?: { erreur?: string } } };
+      setError(axiosErr.response?.data?.erreur || "Email ou mot de passe incorrect");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen relative flex items-center justify-center bg-[#08131F]">
+    <div className="min-h-screen flex items-center justify-center bg-background px-4 relative overflow-hidden">
+      <FloatingThemeToggle />
+      {/* Decorative background elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] bg-primary/5 rounded-full blur-[120px]" />
+        <div className="absolute bottom-[-20%] left-[-10%] w-[500px] h-[500px] bg-accent/5 rounded-full blur-[100px]" />
+      </div>
 
-      {/* IMAGE BACKGROUND */}
-      <img
-        src="https://images.unsplash.com/photo-1493809842364-78817add7ffb"
-        className="absolute inset-0 w-full h-full object-cover"
-      />
+      <div className="relative z-10 w-full max-w-md">
+        {/* Logo */}
+        <Link href="/" className="flex items-center gap-2.5 justify-center mb-10 group">
+          <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-md shadow-primary/20 transition-transform group-hover:scale-105">
+            <Building className="w-5 h-5 text-primary-foreground" />
+          </div>
+          <span className="font-display text-2xl font-bold text-foreground tracking-tight">
+            LuxImmo
+          </span>
+        </Link>
 
-      {/* OVERLAY */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/70 to-[#08131F]"></div>
+        {/* Card */}
+        <div className="bg-surface border border-surface-border rounded-2xl p-8 shadow-xl shadow-black/5 dark:shadow-black/20">
+          <h1 className="font-display text-2xl font-bold text-foreground text-center mb-2">
+            Bienvenue
+          </h1>
+          <p className="text-center text-muted-foreground text-sm mb-8">
+            Connectez-vous à votre espace
+          </p>
 
-      {/* CARD */}
-      <div className="relative z-10 w-full max-w-md bg-[#0B1C2C]/80 backdrop-blur-xl border border-white/10 rounded-2xl p-8 shadow-2xl">
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+            {/* Email */}
+            <div>
+              <label htmlFor="login-email" className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5 block">
+                Email
+              </label>
+              <div className="flex items-center gap-3 bg-background border border-surface-border rounded-xl px-4 py-3 focus-within:border-primary focus-within:ring-1 focus-within:ring-primary transition-all">
+                <Mail className="w-4 h-4 text-muted-foreground shrink-0" />
+                <input
+                  id="login-email"
+                  type="email"
+                  placeholder="nom@exemple.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  className="outline-none w-full bg-transparent text-sm font-medium placeholder:text-muted-foreground/50 text-foreground"
+                />
+              </div>
+            </div>
 
-        <h2 className="text-3xl font-bold text-blue-400 text-center mb-2">
-          Bienvenue
-        </h2>
+            {/* Password */}
+            <div>
+              <label htmlFor="login-password" className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5 block">
+                Mot de passe
+              </label>
+              <div className="flex items-center gap-3 bg-background border border-surface-border rounded-xl px-4 py-3 focus-within:border-primary focus-within:ring-1 focus-within:ring-primary transition-all">
+                <Lock className="w-4 h-4 text-muted-foreground shrink-0" />
+                <input
+                  id="login-password"
+                  type="password"
+                  placeholder="Votre mot de passe"
+                  value={motDePasse}
+                  onChange={(e) => setMotDePasse(e.target.value)}
+                  required
+                  className="outline-none w-full bg-transparent text-sm font-medium placeholder:text-muted-foreground/50 text-foreground"
+                />
+              </div>
+            </div>
 
-        <p className="text-center text-gray-400 mb-6">
-          Connectez-vous à votre espace
-        </p>
+            {/* Error */}
+            {error && (
+              <div className="bg-red-500/10 border border-red-500/20 text-red-500 dark:text-red-400 text-sm px-4 py-3 rounded-xl text-center font-medium">
+                {error}
+              </div>
+            )}
 
-        {/* FORMULAIRE */}
-        <form onSubmit={handleSubmit}>
-          <input
-            type="email"
-            placeholder="Adresse email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            className="text-white w-full p-3 mb-4 bg-transparent border border-white/10 rounded-lg focus:outline-none focus:border-blue-400"
-          />
+            {/* Submit */}
+            <button
+              type="submit"
+              disabled={loading}
+              className="cursor-pointer w-full bg-primary text-primary-foreground py-3.5 rounded-xl font-semibold transition-all hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-md shadow-primary/20 mt-2"
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Connexion...
+                </>
+              ) : (
+                <>
+                  Se connecter
+                  <ArrowRight className="w-4 h-4" />
+                </>
+              )}
+            </button>
+          </form>
+        </div>
 
-          <input
-            type="password"
-            placeholder="Mot de passe"
-            value={motDePasse}
-            onChange={(e) => setMotDePasse(e.target.value)}
-            required
-            className="text-white w-full p-3 mb-4 bg-transparent border border-white/10 rounded-lg focus:outline-none focus:border-blue-400"
-          />
-
-          {/* MESSAGE ERREUR */}
-          {error && (
-            <p className="text-red-400 text-sm mb-4 text-center">
-              {error}
-            </p>
-          )}
-
-          {/* BUTTON */}
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-blue-500 hover:bg-blue-600 py-3 rounded-lg font-semibold transition disabled:opacity-50"
-          >
-            {loading ? "Connexion..." : "Se connecter →"}
-          </button>
-        </form>
-
-        {/* LINKS */}
-        <p className="text-center text-sm text-gray-400 mt-6">
+        {/* Footer link */}
+        <p className="text-center text-sm text-muted-foreground mt-8">
           Pas encore de compte ?{" "}
-          <Link href="/register" className="text-blue-400 hover:underline">
+          <Link href="/register" className="text-primary font-semibold hover:underline">
             Créer un compte
           </Link>
         </p>
-
       </div>
     </div>
   );

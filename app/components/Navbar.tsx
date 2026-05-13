@@ -2,16 +2,22 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useTheme } from "next-themes";
+import { Menu, X, Sun, Moon, Building } from "lucide-react";
+import clsx from "clsx";
 
 const navLinks = [
-  { label: "Acheter", href: "/biens?type=achat" },
-  { label: "Louer", href: "/biens?type=location" },
+  { label: "Acheter", href: "/biens" },
+  { label: "Louer", href: "/biens" },
   { label: "Vendre", href: "/vendre" },
-  { label: "Conciergerie", href: "/conciergerie" },
 ];
 
 export default function Navbar() {
+  const pathname = usePathname();
+  const isHome = pathname === "/";
   const [scrolled, setScrolled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const handler = () => setScrolled(window.scrollY > 10);
@@ -19,262 +25,136 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", handler);
   }, []);
 
+  const effectiveScrolled = !isHome || scrolled;
+
   return (
     <nav
-      style={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        right: 0,
-        zIndex: 100,
-        height: "56px",
-        display: "flex",
-        alignItems: "center",
-        background: scrolled
-          ? "rgba(13, 17, 23, 0.98)"
-          : "#0D1117",
-        borderBottom: "1px solid rgba(255, 255, 255, 0.06)",
-        backdropFilter: scrolled ? "blur(12px)" : "none",
-        transition: "background 0.3s ease, backdrop-filter 0.3s ease",
-      }}
+      className={clsx(
+        "fixed top-0 left-0 right-0 z-50 h-16 flex items-center transition-all duration-300",
+        effectiveScrolled
+          ? "bg-surface/90 border-b border-surface-border backdrop-blur-xl shadow-lg"
+          : "bg-transparent border-b border-transparent"
+      )}
     >
-      <div
-        style={{
-          width: "100%",
-          maxWidth: "1280px",
-          margin: "0 auto",
-          padding: "0 24px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          position: "relative",
-        }}
-      >
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
 
-        {/* ── LOGO ── */}
-        <Link
-          href="/"
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "8px",
-            textDecoration: "none",
-            flexShrink: 0,
-          }}
-        >
-          <div
-            style={{
-              width: "32px",
-              height: "32px",
-              background: "#1E6FFF",
-              borderRadius: "7px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              flexShrink: 0,
-            }}
-          >
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="#fff"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
-              <polyline points="9 22 9 12 15 12 15 22" />
-            </svg>
+        {/* LOGO */}
+        <Link href="/" className="flex items-center gap-2.5 group shrink-0">
+          <div className="w-9 h-9 bg-primary rounded-lg flex items-center justify-center transition-transform group-hover:scale-105 shadow-md shadow-primary/20">
+            <Building className="w-[18px] h-[18px] text-primary-foreground" />
           </div>
-          <span
-            style={{
-              fontSize: "15px",
-              fontWeight: 600,
-              color: "#ffffff",
-              letterSpacing: "0.01em",
-              fontFamily: "'Inter', sans-serif",
-            }}
-          >
-            SupHouse
+          <span className={clsx(
+            "font-display text-xl font-bold tracking-tight transition-colors duration-300",
+            effectiveScrolled ? "text-foreground" : "text-white"
+          )}>
+            LuxImmo
           </span>
         </Link>
 
-        {/* ── NAV LINKS (centré) ── */}
-        <div
-          style={{
-            position: "absolute",
-            left: "50%",
-            transform: "translateX(-50%)",
-            display: "flex",
-            alignItems: "center",
-            gap: "40px",
-          }}
-        >
+        {/* DESKTOP NAV LINKS */}
+        <div className="hidden md:flex items-center gap-8">
           {navLinks.map((link) => (
-            <NavLink key={link.label} href={link.href}>
+            <Link
+              key={link.label}
+              href={link.href}
+              className={clsx(
+                "text-sm font-medium transition-colors duration-200 relative",
+                "after:absolute after:bottom-[-4px] after:left-0 after:w-0 after:h-[2px] after:bg-primary after:transition-all after:duration-300 hover:after:w-full",
+                effectiveScrolled
+                  ? "text-foreground/70 hover:text-foreground"
+                  : "text-white/80 hover:text-white"
+              )}
+            >
               {link.label}
-            </NavLink>
+            </Link>
           ))}
         </div>
 
-        {/* ── ACTIONS DROITE ── */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "8px",
-            flexShrink: 0,
-          }}
-        >
-          {/* Cloche */}
-          <IconButton aria-label="Notifications">
-            <svg
-              width="15"
-              height="15"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" />
-              <path d="M13.73 21a2 2 0 01-3.46 0" />
-            </svg>
-          </IconButton>
-
-          {/* Profil */}
-          <IconButton aria-label="Profil">
-            <svg
-              width="15"
-              height="15"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
-              <circle cx="12" cy="7" r="4" />
-            </svg>
-          </IconButton>
-
-          {/* Globe / Avatar */}
-          <AvatarButton />
+        {/* DESKTOP ACTIONS — only theme toggle + login */}
+        <div className="hidden md:flex items-center gap-3 shrink-0">
+          <ThemeToggle scrolled={effectiveScrolled} />
+          <Link
+            href="/login"
+            className="bg-primary text-primary-foreground px-5 py-2 rounded-lg text-sm font-semibold hover:brightness-110 transition-all shadow-md shadow-primary/20 hover:shadow-primary/40"
+          >
+            Se connecter
+          </Link>
         </div>
 
+        {/* MOBILE: theme toggle + hamburger */}
+        <div className="flex md:hidden items-center gap-2">
+          <ThemeToggle scrolled={effectiveScrolled} />
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className={clsx(
+              "p-2 rounded-lg transition-colors",
+              effectiveScrolled
+                ? "text-foreground hover:bg-muted"
+                : "text-white hover:bg-white/10"
+            )}
+            aria-label="Menu"
+          >
+            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </button>
+        </div>
+      </div>
+
+      {/* MOBILE MENU */}
+      <div
+        className={clsx(
+          "absolute top-16 left-0 right-0 bg-surface border-b border-surface-border shadow-xl md:hidden transition-all duration-300 origin-top",
+          mobileMenuOpen
+            ? "opacity-100 scale-y-100 pointer-events-auto"
+            : "opacity-0 scale-y-95 pointer-events-none"
+        )}
+      >
+        <div className="p-5 flex flex-col gap-1">
+          {navLinks.map((link) => (
+            <Link
+              key={link.label}
+              href={link.href}
+              onClick={() => setMobileMenuOpen(false)}
+              className="text-base font-medium text-foreground hover:text-primary px-3 py-2.5 rounded-lg hover:bg-muted transition-colors"
+            >
+              {link.label}
+            </Link>
+          ))}
+          <div className="h-px bg-surface-border my-3" />
+          <Link
+            href="/login"
+            onClick={() => setMobileMenuOpen(false)}
+            className="bg-primary text-primary-foreground text-center px-5 py-3 rounded-lg text-sm font-semibold hover:brightness-110 transition-all"
+          >
+            Se connecter
+          </Link>
+        </div>
       </div>
     </nav>
   );
 }
 
-/* ── Sous-composants ── */
+function ThemeToggle({ scrolled }: { scrolled: boolean }) {
+  const { resolvedTheme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
 
-function NavLink({
-  href,
-  children,
-}: {
-  href: string;
-  children: React.ReactNode;
-}) {
-  const [hovered, setHovered] = useState(false);
+  useEffect(() => setMounted(true), []);
 
-  return (
-    <Link
-      href={href}
-      style={{
-        fontSize: "13px",
-        fontWeight: 400,
-        color: hovered ? "#ffffff" : "rgba(255,255,255,0.75)",
-        textDecoration: "none",
-        letterSpacing: "0.01em",
-        fontFamily: "'Inter', sans-serif",
-        transition: "color 0.2s",
-        whiteSpace: "nowrap",
-      }}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-    >
-      {children}
-    </Link>
-  );
-}
-
-function IconButton({
-  children,
-  "aria-label": ariaLabel,
-}: {
-  children: React.ReactNode;
-  "aria-label": string;
-}) {
-  const [hovered, setHovered] = useState(false);
+  if (!mounted) {
+    return <div className="w-9 h-9" />;
+  }
 
   return (
     <button
-      aria-label={ariaLabel}
-      style={{
-        width: "36px",
-        height: "36px",
-        borderRadius: "8px",
-        border: `1px solid ${hovered ? "rgba(255,255,255,0.25)" : "rgba(255,255,255,0.1)"}`,
-        background: hovered ? "rgba(255,255,255,0.05)" : "transparent",
-        color: hovered ? "#ffffff" : "rgba(255,255,255,0.6)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        cursor: "pointer",
-        transition: "all 0.2s",
-        flexShrink: 0,
-      }}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
+      onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
+      className={clsx(
+        "w-9 h-9 rounded-lg flex items-center justify-center transition-all shrink-0",
+        scrolled
+          ? "text-foreground/70 hover:text-foreground hover:bg-muted"
+          : "text-white/70 hover:text-white hover:bg-white/10"
+      )}
+      aria-label="Changer le thème"
     >
-      {children}
+      {resolvedTheme === "dark" ? <Sun className="w-[18px] h-[18px]" /> : <Moon className="w-[18px] h-[18px]" />}
     </button>
-  );
-}
-
-function AvatarButton() {
-  const [hovered, setHovered] = useState(false);
-
-  return (
-    <div
-      aria-label="Langue"
-      role="button"
-      tabIndex={0}
-      style={{
-        width: "36px",
-        height: "36px",
-        borderRadius: "50%",
-        background: "linear-gradient(135deg, #1E6FFF 0%, #5B9BFF 100%)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        cursor: "pointer",
-        border: `2px solid ${hovered ? "rgba(30,111,255,0.8)" : "rgba(30,111,255,0.4)"}`,
-        transition: "border-color 0.2s",
-        flexShrink: 0,
-      }}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-    >
-      <svg
-        width="16"
-        height="16"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="#ffffff"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <circle cx="12" cy="12" r="10" />
-        <line x1="2" y1="12" x2="22" y2="12" />
-        <path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z" />
-      </svg>
-    </div>
   );
 }

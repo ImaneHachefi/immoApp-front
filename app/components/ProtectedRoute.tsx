@@ -1,8 +1,10 @@
-'use client';
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { isAuthenticated, getRole } from '../lib/auth';
-import Sidebar from './Sidebar';
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { isAuthenticated, getRole } from "../lib/auth";
+import Sidebar from "./Sidebar";
+import { Loader2 } from "lucide-react";
 
 interface Props {
   children: React.ReactNode;
@@ -14,24 +16,35 @@ export default function ProtectedRoute({ children, allowedRoles }: Props) {
   const [ok, setOk] = useState(false);
 
   useEffect(() => {
-    if (!isAuthenticated()) { router.push('/login'); return; }
+    if (!isAuthenticated()) {
+      router.push("/login");
+      return;
+    }
     if (allowedRoles) {
       const role = getRole();
-      if (!role || !allowedRoles.includes(role)) { router.push('/login'); return; }
+      if (!role || !allowedRoles.includes(role)) {
+        router.push("/login");
+        return;
+      }
     }
     setOk(true);
-  }, []);
+  }, [router, allowedRoles]);
 
-  if (!ok) return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', background: '#060e18' }}>
-      <div style={{ color: '#639dff', fontFamily: "'DM Sans', sans-serif", fontSize: 14 }}>Chargement...</div>
-    </div>
-  );
+  if (!ok) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-background">
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 className="w-8 h-8 text-primary animate-spin" />
+          <span className="text-muted-foreground text-sm font-medium">Chargement...</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: '#060e18', fontFamily: "'DM Sans', sans-serif" }}>
+    <div className="flex min-h-screen bg-background text-foreground">
       <Sidebar />
-      <main style={{ marginLeft: 240, flex: 1, padding: '32px', color: '#f0ece4', minHeight: '100vh' }}>
+      <main className="ml-0 md:ml-[260px] flex-1 pt-[72px] md:pt-8 px-4 pb-6 md:px-8 min-h-screen transition-all">
         {children}
       </main>
     </div>

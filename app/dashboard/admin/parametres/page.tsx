@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import ProtectedRoute from '../../../components/ProtectedRoute';
 import { logout } from '../../../lib/auth';
+import { User, Shield, Bell, Palette, LogOut, Check, Camera } from 'lucide-react';
 
 export default function Parametres() {
   const [nom, setNom] = useState('');
@@ -26,105 +27,100 @@ export default function Parametres() {
   };
 
   const initials = nom ? nom.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : 'SH';
-  const roleColors: Record<string, string> = { ADMIN: '#f59e0b', AGENT_COMMERCIAL: '#639dff', AGENT_SAV: '#a78bfa', CLIENT: '#34d399' };
+  const roleColors: Record<string, string> = { ADMIN: '#d4a017', AGENT_COMMERCIAL: '#2563eb', AGENT_SAV: '#7c3aed', CLIENT: '#10b981' };
 
   const menuItems = [
-    { icon: '👤', label: 'Profil', active: true },
-    { icon: '🔐', label: 'Sécurité', active: false },
-    { icon: '🔔', label: 'Notifications', active: false },
-    { icon: '🎨', label: 'Préférences', active: false },
+    { icon: <User className="w-4 h-4" />, label: 'Profil', active: true },
+    { icon: <Shield className="w-4 h-4" />, label: 'Sécurité', active: false },
+    { icon: <Bell className="w-4 h-4" />, label: 'Notifications', active: false },
+    { icon: <Palette className="w-4 h-4" />, label: 'Préférences', active: false },
   ];
 
   return (
     <ProtectedRoute>
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=DM+Sans:wght@300;400;500&display=swap');`}</style>
-      <div style={{ maxWidth: 1000 }}>
+      <div className="max-w-[1000px]">
 
         {/* Header */}
-        <div style={{ marginBottom: 32 }}>
-          <div style={{ fontSize: 11, letterSpacing: '0.2em', textTransform: 'uppercase', color: '#639dff', marginBottom: 8 }}>Compte</div>
-          <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 40, fontWeight: 300, color: '#f0ece4', margin: 0 }}>Paramètres du Profil</h1>
-          <p style={{ color: 'rgba(240,236,228,0.5)', fontSize: 14, marginTop: 4 }}>Gérez vos informations personnelles et préférences</p>
+        <div className="mb-8">
+          <div className="text-xs font-semibold tracking-[0.2em] uppercase text-primary mb-2">Compte</div>
+          <h1 className="font-display text-3xl md:text-4xl font-light text-foreground">Paramètres du Profil</h1>
+          <p className="text-muted-foreground text-sm mt-1">Gérez vos informations personnelles et préférences</p>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '220px 1fr', gap: 20 }}>
+        <div className="grid grid-cols-1 md:grid-cols-[220px_1fr] gap-5">
 
-          {/* Left menu */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+          {/* Left menu - hidden on mobile */}
+          <div className="hidden md:flex flex-col gap-1">
             {menuItems.map((item, i) => (
-              <div key={i} style={{
-                display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', borderRadius: 8,
-                background: item.active ? 'rgba(99,157,255,0.1)' : 'transparent',
-                borderLeft: item.active ? '2px solid #3b82f6' : '2px solid transparent',
-                color: item.active ? '#639dff' : 'rgba(240,236,228,0.5)',
-                fontSize: 13, cursor: 'pointer', transition: 'all 0.2s',
-              }}
-                onMouseEnter={e => { if (!item.active) (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.04)'; }}
-                onMouseLeave={e => { if (!item.active) (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
-              >
-                <span>{item.icon}</span>
+              <button key={i} className={`flex items-center gap-2.5 px-3.5 py-2.5 rounded-lg text-sm font-medium transition-all cursor-pointer w-full text-left ${
+                item.active
+                  ? 'bg-primary/10 text-primary border-l-2 border-primary'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-muted border-l-2 border-transparent'
+              }`}>
+                {item.icon}
                 <span>{item.label}</span>
-              </div>
+              </button>
             ))}
 
-            <div style={{ marginTop: 8, borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: 8 }}>
-              <div onClick={logout} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', borderRadius: 8, color: '#f87171', fontSize: 13, cursor: 'pointer', transition: 'background 0.2s' }}
-                onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = 'rgba(248,113,113,0.08)'}
-                onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'transparent'}>
-                <span>↩</span>
+            <div className="mt-2 border-t border-surface-border pt-2">
+              <button onClick={logout} className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-lg text-sm font-medium text-red-500 dark:text-red-400 hover:bg-red-500/5 transition-colors cursor-pointer w-full">
+                <LogOut className="w-4 h-4" />
                 <span>Déconnexion</span>
-              </div>
+              </button>
             </div>
           </div>
 
           {/* Right content */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div className="flex flex-col gap-5">
 
             {/* Profile card */}
-            <div style={{ background: '#0b1825', borderRadius: 14, padding: 28, border: '1px solid rgba(255,255,255,0.06)' }}>
-              <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 22, fontWeight: 400, color: '#f0ece4', margin: '0 0 24px' }}>Informations Générales</h2>
+            <div className="bg-surface rounded-xl p-6 md:p-7 border border-surface-border shadow-sm">
+              <h2 className="font-display text-xl font-medium text-foreground mb-6">Informations Générales</h2>
 
               {/* Avatar */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 20, marginBottom: 28, padding: '16px 20px', background: 'rgba(255,255,255,0.03)', borderRadius: 10, border: '1px solid rgba(255,255,255,0.05)' }}>
-                <div style={{ width: 70, height: 70, borderRadius: '50%', background: 'linear-gradient(135deg, #1d4ed8, #3b82f6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 26, fontWeight: 700, color: '#fff', flexShrink: 0, boxShadow: '0 0 0 3px rgba(99,157,255,0.3)' }}>
+              <div className="flex items-center gap-5 mb-7 p-4 bg-muted/50 rounded-xl border border-surface-border/50">
+                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-2xl font-bold text-primary-foreground shrink-0 ring-3 ring-primary/20">
                   {initials}
                 </div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 22, fontWeight: 500, color: '#f0ece4', marginBottom: 4 }}>{nom}</div>
-                  <div style={{ fontSize: 12, color: 'rgba(240,236,228,0.4)', marginBottom: 8 }}>{email}</div>
-                  <span style={{ fontSize: 11, fontWeight: 600, padding: '3px 10px', borderRadius: 100, background: `${roleColors[role] || '#639dff'}18`, color: roleColors[role] || '#639dff' }}>
+                <div className="flex-1 min-w-0">
+                  <div className="font-display text-xl font-medium text-foreground mb-1 truncate">{nom}</div>
+                  <div className="text-sm text-muted-foreground mb-2">{email}</div>
+                  <span
+                    className="text-xs font-semibold px-2.5 py-1 rounded-full"
+                    style={{ background: `${roleColors[role] || '#2563eb'}18`, color: roleColors[role] || '#2563eb' }}
+                  >
                     {role?.replace('_', ' ')}
                   </span>
                 </div>
-                <div style={{ display: 'flex', gap: 8 }}>
-                  <button style={{ padding: '8px 16px', background: 'rgba(99,157,255,0.1)', border: '1px solid rgba(99,157,255,0.2)', borderRadius: 6, color: '#639dff', fontSize: 12, cursor: 'pointer', fontFamily: "'DM Sans',sans-serif" }}>
-                    Changer la photo
-                  </button>
-                </div>
+                <button className="px-4 py-2 bg-primary/10 border border-primary/20 rounded-lg text-primary text-xs font-medium hover:bg-primary/15 transition-colors cursor-pointer shrink-0 flex items-center gap-1.5">
+                  <Camera className="w-3.5 h-3.5" />
+                  Changer la photo
+                </button>
               </div>
 
               {/* Form */}
               <form onSubmit={handleSave}>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                   <div>
-                    <label style={{ fontSize: 11, color: 'rgba(240,236,228,0.5)', display: 'block', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Nom complet</label>
+                    <label className="text-xs font-medium text-muted-foreground block mb-1.5 uppercase tracking-wider">Nom complet</label>
                     <input value={nom} onChange={e => setNom(e.target.value)}
-                      style={{ width: '100%', padding: '11px 14px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, color: '#f0ece4', fontFamily: "'DM Sans',sans-serif", fontSize: 14, outline: 'none', boxSizing: 'border-box' }} />
+                      className="w-full px-3.5 py-2.5 bg-muted border border-surface-border rounded-lg text-foreground text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all" />
                   </div>
                   <div>
-                    <label style={{ fontSize: 11, color: 'rgba(240,236,228,0.5)', display: 'block', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Adresse Email</label>
+                    <label className="text-xs font-medium text-muted-foreground block mb-1.5 uppercase tracking-wider">Adresse Email</label>
                     <input value={email} readOnly
-                      style={{ width: '100%', padding: '11px 14px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.04)', borderRadius: 8, color: 'rgba(240,236,228,0.4)', fontFamily: "'DM Sans',sans-serif", fontSize: 14, outline: 'none', cursor: 'not-allowed', boxSizing: 'border-box' }} />
+                      className="w-full px-3.5 py-2.5 bg-muted/50 border border-surface-border/50 rounded-lg text-muted-foreground text-sm outline-none cursor-not-allowed" />
                   </div>
                 </div>
 
-                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 20 }}>
+                <div className="flex justify-end gap-3 mt-5">
                   {saved && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '10px 16px', background: 'rgba(52,211,153,0.1)', border: '1px solid rgba(52,211,153,0.2)', borderRadius: 8, color: '#34d399', fontSize: 13 }}>
-                      ✓ Modifications enregistrées
+                    <div className="flex items-center gap-1.5 px-4 py-2.5 bg-emerald-500/10 border border-emerald-500/20 rounded-lg text-emerald-600 dark:text-emerald-400 text-sm font-medium">
+                      <Check className="w-4 h-4" />
+                      Modifications enregistrées
                     </div>
                   )}
-                  <button type="submit" style={{ padding: '11px 28px', background: 'linear-gradient(135deg,#1d4ed8,#3b82f6)', border: 'none', borderRadius: 8, color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans',sans-serif", fontSize: 13, fontWeight: 500 }}>
+                  <button type="submit" className="px-6 py-2.5 bg-primary text-primary-foreground rounded-lg cursor-pointer hover:brightness-110 transition-all text-sm font-medium shadow-sm">
                     Enregistrer les modifications
                   </button>
                 </div>
@@ -132,45 +128,48 @@ export default function Parametres() {
             </div>
 
             {/* Preferences */}
-            <div style={{ background: '#0b1825', borderRadius: 14, padding: 28, border: '1px solid rgba(255,255,255,0.06)' }}>
-              <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 22, fontWeight: 400, color: '#f0ece4', margin: '0 0 20px' }}>
-                ⚙️ Préférences de l'Interface
-              </h2>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+            <div className="bg-surface rounded-xl p-6 md:p-7 border border-surface-border shadow-sm">
+              <h2 className="font-display text-xl font-medium text-foreground mb-5">Préférences de l&apos;Interface</h2>
+              <div className="flex flex-col">
                 {[
                   { label: 'Mode Sombre', sub: 'Activer le thème visuel sombre', value: darkMode, set: setDarkMode },
                   { label: 'Notifications', sub: 'Recevoir des alertes par email', value: notifs, set: setNotifs },
                 ].map((pref, i) => (
-                  <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 0', borderBottom: i < 1 ? '1px solid rgba(255,255,255,0.04)' : 'none' }}>
+                  <div key={i} className={`flex justify-between items-center py-4 ${i < 1 ? 'border-b border-surface-border/50' : ''}`}>
                     <div>
-                      <div style={{ fontSize: 14, color: '#f0ece4', fontWeight: 500, marginBottom: 2 }}>{pref.label}</div>
-                      <div style={{ fontSize: 12, color: 'rgba(240,236,228,0.4)' }}>{pref.sub}</div>
+                      <div className="text-sm font-medium text-foreground mb-0.5">{pref.label}</div>
+                      <div className="text-xs text-muted-foreground">{pref.sub}</div>
                     </div>
                     {/* Toggle */}
-                    <div onClick={() => pref.set(!pref.value)} style={{ width: 44, height: 24, borderRadius: 100, background: pref.value ? '#3b82f6' : 'rgba(255,255,255,0.1)', cursor: 'pointer', position: 'relative', transition: 'background 0.3s', flexShrink: 0 }}>
-                      <div style={{ width: 18, height: 18, borderRadius: '50%', background: '#fff', position: 'absolute', top: 3, left: pref.value ? 23 : 3, transition: 'left 0.3s', boxShadow: '0 1px 4px rgba(0,0,0,0.3)' }} />
-                    </div>
+                    <button
+                      onClick={() => pref.set(!pref.value)}
+                      className={`w-11 h-6 rounded-full relative transition-colors duration-300 shrink-0 cursor-pointer ${pref.value ? 'bg-primary' : 'bg-muted-foreground/20'}`}
+                      role="switch"
+                      aria-checked={pref.value}
+                    >
+                      <div className={`w-[18px] h-[18px] rounded-full bg-white absolute top-[3px] transition-[left] duration-300 shadow-sm ${pref.value ? 'left-[23px]' : 'left-[3px]'}`} />
+                    </button>
                   </div>
                 ))}
               </div>
             </div>
 
             {/* Danger zone */}
-            <div style={{ background: '#0b1825', borderRadius: 14, padding: 28, border: '1px solid rgba(248,113,113,0.15)' }}>
-              <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 22, fontWeight: 400, color: '#f87171', margin: '0 0 8px' }}>Zone de danger</h2>
-              <p style={{ fontSize: 13, color: 'rgba(240,236,228,0.4)', margin: '0 0 16px', lineHeight: 1.6 }}>
+            <div className="bg-surface rounded-xl p-6 md:p-7 border border-red-500/15 shadow-sm">
+              <h2 className="font-display text-xl font-medium text-red-500 dark:text-red-400 mb-2">Zone de danger</h2>
+              <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
                 La suppression de votre compte est irréversible. Toutes vos données seront définitivement perdues.
               </p>
               {!showDanger ? (
-                <button onClick={() => setShowDanger(true)} style={{ padding: '10px 20px', background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.25)', borderRadius: 8, color: '#f87171', cursor: 'pointer', fontFamily: "'DM Sans',sans-serif", fontSize: 13 }}>
+                <button onClick={() => setShowDanger(true)} className="px-5 py-2.5 bg-red-500/5 border border-red-500/15 rounded-lg text-red-500 dark:text-red-400 cursor-pointer hover:bg-red-500/10 transition-colors text-sm font-medium">
                   Supprimer mon compte
                 </button>
               ) : (
-                <div style={{ background: 'rgba(248,113,113,0.06)', borderRadius: 10, padding: 16, border: '1px solid rgba(248,113,113,0.2)' }}>
-                  <p style={{ fontSize: 13, color: '#f87171', marginBottom: 12 }}>⚠️ Êtes-vous sûr ? Cette action est irréversible.</p>
-                  <div style={{ display: 'flex', gap: 10 }}>
-                    <button onClick={() => setShowDanger(false)} style={{ padding: '9px 18px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, color: '#f0ece4', cursor: 'pointer', fontFamily: "'DM Sans',sans-serif", fontSize: 13 }}>Annuler</button>
-                    <button onClick={logout} style={{ padding: '9px 18px', background: '#f87171', border: 'none', borderRadius: 8, color: '#fff', cursor: 'pointer', fontFamily: "'DM Sans',sans-serif", fontSize: 13, fontWeight: 500 }}>Confirmer la suppression</button>
+                <div className="bg-red-500/5 rounded-lg p-4 border border-red-500/15">
+                  <p className="text-sm text-red-500 dark:text-red-400 mb-3 font-medium">⚠ Êtes-vous sûr ? Cette action est irréversible.</p>
+                  <div className="flex gap-3">
+                    <button onClick={() => setShowDanger(false)} className="px-4 py-2 bg-muted border border-surface-border rounded-lg text-foreground cursor-pointer hover:bg-muted/80 transition-colors text-sm">Annuler</button>
+                    <button onClick={logout} className="px-4 py-2 bg-red-500 rounded-lg text-white cursor-pointer hover:bg-red-600 transition-colors text-sm font-medium">Confirmer la suppression</button>
                   </div>
                 </div>
               )}

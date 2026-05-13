@@ -1,93 +1,102 @@
-'use client';
-import { useEffect, useState } from 'react';
-import ProtectedRoute from '../../components/ProtectedRoute';
-import api from '../../lib/api';
-import Link from 'next/link';
+"use client";
+
+import { useEffect, useState } from "react";
+import ProtectedRoute from "../../components/ProtectedRoute";
+import api from "../../lib/api";
+import Link from "next/link";
+import { Users, Flame, Building, LayoutGrid, UserCheck, Bot, ChevronRight } from "lucide-react";
 
 export default function AgentCommercialDashboard() {
-  const [data, setData] = useState<any>(null);
+  const [data, setData] = useState<Record<string, number> | null>(null);
   const [loading, setLoading] = useState(true);
-  const [nom, setNom] = useState('');
+  const [nom, setNom] = useState("");
 
   useEffect(() => {
-    setNom(localStorage.getItem('nom') || 'Agent');
-    api.get('/api/dashboard').then(r => setData(r.data)).catch(console.error).finally(() => setLoading(false));
+    setNom(localStorage.getItem("nom") || "Agent");
+    api.get("/api/dashboard")
+      .then((r) => setData(r.data))
+      .catch(console.error)
+      .finally(() => setLoading(false));
   }, []);
 
   const cards = [
-    { label: 'Mes Prospects', value: data?.totalProspects || 0, icon: '👥', color: '#639dff', href: '/dashboard/agent-commercial/prospects' },
-    { label: 'Prospects Chauds 🔥', value: data?.prospectsChauds || 0, icon: '🔥', color: '#f59e0b', href: '/dashboard/agent-commercial/qualification' },
-    { label: 'Biens Disponibles', value: data?.biensDisponibles || 0, icon: '🏠', color: '#34d399', href: '/dashboard/agent-commercial/biens' },
-    { label: 'Total Biens', value: data?.totalBiens || 0, icon: '🏘️', color: '#a78bfa', href: '/dashboard/agent-commercial/biens' },
+    { label: "Mes Prospects", value: data?.totalProspects ?? 0, icon: <Users className="w-5 h-5" />, color: "#6366f1", href: "/dashboard/agent-commercial/prospects" },
+    { label: "Prospects Chauds", value: data?.prospectsChauds ?? 0, icon: <Flame className="w-5 h-5" />, color: "#f59e0b", href: "/dashboard/agent-commercial/qualification" },
+    { label: "Biens Disponibles", value: data?.biensDisponibles ?? 0, icon: <Building className="w-5 h-5" />, color: "#10b981", href: "/dashboard/agent-commercial/biens" },
+    { label: "Total Biens", value: data?.totalBiens ?? 0, icon: <LayoutGrid className="w-5 h-5" />, color: "#a78bfa", href: "/dashboard/agent-commercial/biens" },
   ];
 
   return (
-    <ProtectedRoute allowedRoles={['AGENT_COMMERCIAL', 'ADMIN']}>
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=DM+Sans:wght@300;400;500&display=swap');`}</style>
-      <div style={{ maxWidth: 1100 }}>
+    <ProtectedRoute allowedRoles={["AGENT_COMMERCIAL", "ADMIN"]}>
+      <div className="max-w-[1100px]">
         {/* Header */}
-        <div style={{ marginBottom: 36 }}>
-          <div style={{ fontSize: 11, letterSpacing: '0.2em', textTransform: 'uppercase', color: '#639dff', marginBottom: 8 }}>Tableau de bord</div>
-          <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 42, fontWeight: 300, color: '#f0ece4', margin: 0 }}>
-            Bonjour, <span style={{ fontStyle: 'italic', color: '#639dff' }}>{nom}</span>
+        <div className="mb-8">
+          <p className="text-xs tracking-[0.2em] uppercase text-primary font-semibold mb-2">Tableau de bord</p>
+          <h1 className="font-display text-3xl md:text-4xl font-light text-foreground">
+            Bonjour, <span className="italic text-primary">{nom}</span>
           </h1>
-          <p style={{ color: 'rgba(240,236,228,0.5)', fontSize: 14, marginTop: 6 }}>Voici un aperçu de vos activités commerciales</p>
+          <p className="text-muted-foreground text-sm mt-2">Voici un aperçu de vos activités commerciales</p>
         </div>
 
         {/* Stats */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16, marginBottom: 36 }}>
-          {cards.map((c, i) => (
-            <Link key={i} href={c.href} style={{ textDecoration: 'none' }}>
-              <div style={{ background: '#0b1825', borderRadius: 12, padding: '24px', border: '1px solid rgba(255,255,255,0.06)', transition: 'transform 0.2s, box-shadow 0.2s', cursor: 'pointer' }}
-                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = 'translateY(-4px)'; (e.currentTarget as HTMLElement).style.boxShadow = '0 16px 40px rgba(0,0,0,0.3)'; }}
-                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = 'translateY(0)'; (e.currentTarget as HTMLElement).style.boxShadow = 'none'; }}>
-                <div style={{ fontSize: 24, marginBottom: 16 }}>{c.icon}</div>
-                <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 42, fontWeight: 300, color: c.color, lineHeight: 1 }}>{loading ? '—' : c.value}</div>
-                <div style={{ fontSize: 12, color: 'rgba(240,236,228,0.45)', marginTop: 8, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{c.label}</div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          {cards.map((c) => (
+            <Link key={c.label} href={c.href} className="group">
+              <div className="bg-surface border border-surface-border rounded-xl p-6 hover:-translate-y-1 hover:shadow-lg hover:border-primary/20 transition-all duration-300">
+                <div className="p-2.5 rounded-lg w-fit mb-4" style={{ backgroundColor: `${c.color}15` }}>
+                  <div style={{ color: c.color }}>{c.icon}</div>
+                </div>
+                <div className="font-display text-4xl font-light mb-1.5" style={{ color: c.color }}>
+                  {loading ? "—" : c.value}
+                </div>
+                <div className="text-xs text-muted-foreground uppercase tracking-wider font-medium">{c.label}</div>
               </div>
             </Link>
           ))}
         </div>
 
         {/* Quick actions */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 24 }}>
-          <div style={{ background: '#0b1825', borderRadius: 12, padding: 24, border: '1px solid rgba(255,255,255,0.06)' }}>
-            <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 22, fontWeight: 400, color: '#f0ece4', margin: '0 0 16px' }}>Répartition IA</h3>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          {/* IA Répartition */}
+          <div className="bg-surface border border-surface-border rounded-xl p-6">
+            <h3 className="font-display text-xl font-medium text-foreground mb-5">Répartition IA</h3>
             {[
-              { label: 'Prospects Chauds', value: data?.prospectsChauds || 0, color: '#f59e0b', icon: '🔥' },
-              { label: 'Prospects Tièdes', value: data?.prospectsTièdes || 0, color: '#639dff', icon: '🌤️' },
-              { label: 'Prospects Froids', value: data?.prospectsFroids || 0, color: '#94a3b8', icon: '❄️' },
-            ].map((item, i) => {
-              const total = (data?.totalProspects || 1);
+              { label: "Prospects Chauds", value: data?.prospectsChauds ?? 0, color: "#f59e0b", icon: <Flame className="w-4 h-4" /> },
+              { label: "Prospects Tièdes", value: data?.prospectsTièdes ?? 0, color: "#6366f1", icon: <Users className="w-4 h-4" /> },
+              { label: "Prospects Froids", value: data?.prospectsFroids ?? 0, color: "#94a3b8", icon: <Users className="w-4 h-4" /> },
+            ].map((item) => {
+              const total = data?.totalProspects || 1;
               const pct = Math.round((item.value / total) * 100);
               return (
-                <div key={i} style={{ marginBottom: 14 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
-                    <span style={{ fontSize: 13, color: 'rgba(240,236,228,0.7)' }}>{item.icon} {item.label}</span>
-                    <span style={{ fontSize: 13, color: item.color, fontWeight: 600 }}>{item.value}</span>
+                <div key={item.label} className="mb-4">
+                  <div className="flex justify-between mb-1.5">
+                    <span className="text-sm text-muted-foreground flex items-center gap-2">
+                      <span style={{ color: item.color }}>{item.icon}</span>
+                      {item.label}
+                    </span>
+                    <span className="text-sm font-semibold" style={{ color: item.color }}>{item.value}</span>
                   </div>
-                  <div style={{ height: 4, background: 'rgba(255,255,255,0.06)', borderRadius: 100 }}>
-                    <div style={{ height: '100%', width: `${pct}%`, background: item.color, borderRadius: 100, transition: 'width 1s ease' }} />
+                  <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                    <div className="h-full rounded-full transition-all duration-1000 ease-out" style={{ width: `${pct}%`, backgroundColor: item.color }} />
                   </div>
                 </div>
               );
             })}
           </div>
 
-          <div style={{ background: '#0b1825', borderRadius: 12, padding: 24, border: '1px solid rgba(255,255,255,0.06)' }}>
-            <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 22, fontWeight: 400, color: '#f0ece4', margin: '0 0 16px' }}>Actions rapides</h3>
+          {/* Actions rapides */}
+          <div className="bg-surface border border-surface-border rounded-xl p-6">
+            <h3 className="font-display text-xl font-medium text-foreground mb-5">Actions rapides</h3>
             {[
-              { label: 'Voir mes prospects', href: '/dashboard/agent-commercial/prospects', icon: '👥', color: '#639dff' },
-              { label: 'Gérer les biens', href: '/dashboard/agent-commercial/biens', icon: '🏠', color: '#34d399' },
-              { label: 'Qualification IA', href: '/dashboard/agent-commercial/qualification', icon: '🤖', color: '#f59e0b' },
-            ].map((action, i) => (
-              <Link key={i} href={action.href} style={{ textDecoration: 'none' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px', borderRadius: 8, marginBottom: 8, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)', cursor: 'pointer', transition: 'background 0.2s' }}
-                  onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.06)'}
-                  onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.03)'}>
-                  <span style={{ fontSize: 18 }}>{action.icon}</span>
-                  <span style={{ fontSize: 13, color: action.color, fontWeight: 500 }}>{action.label}</span>
-                  <span style={{ marginLeft: 'auto', color: 'rgba(240,236,228,0.3)', fontSize: 16 }}>→</span>
+              { label: "Voir mes prospects", href: "/dashboard/agent-commercial/prospects", icon: <UserCheck className="w-4 h-4" />, color: "#6366f1" },
+              { label: "Gérer les biens", href: "/dashboard/agent-commercial/biens", icon: <Building className="w-4 h-4" />, color: "#10b981" },
+              { label: "Qualification IA", href: "/dashboard/agent-commercial/qualification", icon: <Bot className="w-4 h-4" />, color: "#f59e0b" },
+            ].map((action) => (
+              <Link key={action.label} href={action.href}>
+                <div className="flex items-center gap-3 px-4 py-3 rounded-lg mb-2 bg-muted/30 border border-surface-border hover:bg-muted transition-colors cursor-pointer group">
+                  <span style={{ color: action.color }}>{action.icon}</span>
+                  <span className="text-sm font-medium text-foreground flex-1">{action.label}</span>
+                  <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:translate-x-1 transition-transform" />
                 </div>
               </Link>
             ))}

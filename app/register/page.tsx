@@ -3,8 +3,10 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { Building, Mail, Lock, UserPlus, Loader2 } from "lucide-react";
 import api from "../lib/api";
 import { saveAuth } from "../lib/auth";
+import FloatingThemeToggle from "../components/FloatingThemeToggle";
 
 export default function Register() {
   const router = useRouter();
@@ -29,100 +31,151 @@ export default function Register() {
 
       saveAuth(response.data);
       router.push("/dashboard/client");
-
-    } catch (err: any) {
-      setError(
-        err.response?.data?.erreur || "Erreur lors de l'inscription"
-      );
+    } catch (err: unknown) {
+      const axiosErr = err as { response?: { data?: { erreur?: string } } };
+      setError(axiosErr.response?.data?.erreur || "Erreur lors de l'inscription");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen grid md:grid-cols-2 bg-[#08131F]">
-
-      {/* IMAGE */}
-      <div className="hidden md:block relative">
+    <div className="min-h-screen flex bg-background">
+      <FloatingThemeToggle />
+      {/* LEFT — Image panel (desktop only) */}
+      <div className="hidden lg:flex lg:w-1/2 relative items-end p-10">
         <img
-          src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c"
+          src="/hero-bg.png"
+          alt="Propriété de luxe"
           className="absolute inset-0 w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
-
-        <div className="absolute bottom-10 left-10 text-white max-w-sm">
-          <h2 className="text-3xl font-bold">
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+        <div className="relative z-10 max-w-md">
+          <h2 className="font-display text-4xl font-bold text-white mb-3">
             Trouvez la demeure de vos rêves
           </h2>
-          <p className="text-gray-300 mt-2">
-            Accédez à notre catalogue exclusif.
+          <p className="text-white/60 text-base">
+            Accédez à notre catalogue exclusif de propriétés d&apos;exception.
           </p>
         </div>
       </div>
 
-      {/* FORM */}
-      <div className="flex items-center justify-center p-6">
-        <div className="w-full max-w-md bg-[#0B1C2C]/80 backdrop-blur-xl border border-white/10 rounded-2xl p-8 shadow-xl">
+      {/* RIGHT — Form */}
+      <div className="flex-1 flex items-center justify-center px-4 py-12 relative">
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-[-15%] right-[-5%] w-[400px] h-[400px] bg-primary/5 rounded-full blur-[100px]" />
+        </div>
 
-          <h2 className="text-3xl font-bold mb-2 text-blue-400">
-            Créer un compte
-          </h2>
+        <div className="relative z-10 w-full max-w-md">
+          {/* Logo */}
+          <Link href="/" className="flex items-center gap-2.5 justify-center mb-10 group">
+            <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-md shadow-primary/20 transition-transform group-hover:scale-105">
+              <Building className="w-5 h-5 text-primary-foreground" />
+            </div>
+            <span className="font-display text-2xl font-bold text-foreground tracking-tight">
+              LuxImmo
+            </span>
+          </Link>
 
-          <p className="text-gray-400 mb-6">
-            Commencez votre expérience luxe
-          </p>
+          {/* Card */}
+          <div className="bg-surface border border-surface-border rounded-2xl p-8 shadow-xl shadow-black/5 dark:shadow-black/20">
+            <h1 className="font-display text-2xl font-bold text-foreground mb-2">
+              Créer un compte
+            </h1>
+            <p className="text-muted-foreground text-sm mb-8">
+              Commencez votre expérience luxe
+            </p>
 
-          <form onSubmit={handleSubmit}>
-            <input
-              type="text"
-              placeholder="Nom complet"
-              value={nom}
-              onChange={(e) => setNom(e.target.value)}
-              required
-              className="text-white w-full p-3 mb-4 bg-transparent border border-white/10 rounded-lg focus:border-blue-400"
-            />
+            <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+              {/* Name */}
+              <div>
+                <label htmlFor="register-name" className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5 block">
+                  Nom complet
+                </label>
+                <div className="flex items-center gap-3 bg-background border border-surface-border rounded-xl px-4 py-3 focus-within:border-primary focus-within:ring-1 focus-within:ring-primary transition-all">
+                  <UserPlus className="w-4 h-4 text-muted-foreground shrink-0" />
+                  <input
+                    id="register-name"
+                    type="text"
+                    placeholder="Prénom Nom"
+                    value={nom}
+                    onChange={(e) => setNom(e.target.value)}
+                    required
+                    className="outline-none w-full bg-transparent text-sm font-medium placeholder:text-muted-foreground/50 text-foreground"
+                  />
+                </div>
+              </div>
 
-            <input
-              type="email"
-              placeholder="Adresse email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="text-white w-full p-3 mb-4 bg-transparent border border-white/10 rounded-lg focus:border-blue-400"
-            />
+              {/* Email */}
+              <div>
+                <label htmlFor="register-email" className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5 block">
+                  Email
+                </label>
+                <div className="flex items-center gap-3 bg-background border border-surface-border rounded-xl px-4 py-3 focus-within:border-primary focus-within:ring-1 focus-within:ring-primary transition-all">
+                  <Mail className="w-4 h-4 text-muted-foreground shrink-0" />
+                  <input
+                    id="register-email"
+                    type="email"
+                    placeholder="nom@exemple.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    className="outline-none w-full bg-transparent text-sm font-medium placeholder:text-muted-foreground/50 text-foreground"
+                  />
+                </div>
+              </div>
 
-            <input
-              type="password"
-              placeholder="Mot de passe"
-              value={motDePasse}
-              onChange={(e) => setMotDePasse(e.target.value)}
-              required
-              className="text-white w-full p-3 mb-4 bg-transparent border border-white/10 rounded-lg focus:border-blue-400"
-            />
+              {/* Password */}
+              <div>
+                <label htmlFor="register-password" className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5 block">
+                  Mot de passe
+                </label>
+                <div className="flex items-center gap-3 bg-background border border-surface-border rounded-xl px-4 py-3 focus-within:border-primary focus-within:ring-1 focus-within:ring-primary transition-all">
+                  <Lock className="w-4 h-4 text-muted-foreground shrink-0" />
+                  <input
+                    id="register-password"
+                    type="password"
+                    placeholder="Minimum 6 caractères"
+                    value={motDePasse}
+                    onChange={(e) => setMotDePasse(e.target.value)}
+                    required
+                    className="outline-none w-full bg-transparent text-sm font-medium placeholder:text-muted-foreground/50 text-foreground"
+                  />
+                </div>
+              </div>
 
-            {/* MESSAGE ERREUR */}
-            {error && (
-              <p className="text-red-400 text-sm mb-4 text-center">
-                {error}
-              </p>
-            )}
+              {/* Error */}
+              {error && (
+                <div className="bg-red-500/10 border border-red-500/20 text-red-500 dark:text-red-400 text-sm px-4 py-3 rounded-xl text-center font-medium">
+                  {error}
+                </div>
+              )}
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-blue-500 hover:bg-blue-600 py-3 rounded-lg font-semibold disabled:opacity-50"
-            >
-              {loading ? "Création..." : "Créer mon compte"}
-            </button>
-          </form>
+              {/* Submit */}
+              <button
+                type="submit"
+                disabled={loading}
+                className="cursor-pointer w-full bg-primary text-primary-foreground py-3.5 rounded-xl font-semibold transition-all hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-md shadow-primary/20 mt-2"
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Création...
+                  </>
+                ) : (
+                  "Créer mon compte"
+                )}
+              </button>
+            </form>
+          </div>
 
-          <p className="text-sm text-gray-400 mt-6 text-center">
+          {/* Footer link */}
+          <p className="text-center text-sm text-muted-foreground mt-8">
             Déjà inscrit ?{" "}
-            <Link href="/login" className="text-blue-400">
+            <Link href="/login" className="text-primary font-semibold hover:underline">
               Se connecter
             </Link>
           </p>
-
         </div>
       </div>
     </div>
